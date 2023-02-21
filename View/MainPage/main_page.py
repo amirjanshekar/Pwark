@@ -94,7 +94,7 @@ class MainMenu(Tk):
 
     def go_to_second_page(self):
         month = (month['id'] for month in self.months if month['value'] == self.month_list.get()).__next__()
-        data = {"year": self.year_list.get, 'month': month, 'day': self.day_list.get()}
+        data = {"year": self.year_list.get(), 'month': month, 'day': self.day_list.get()}
         self.destroy()
         products = Products(self.connection, data)
         products.mainloop()
