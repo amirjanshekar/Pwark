@@ -17,6 +17,8 @@ class Login(Tk):
         self.login_frame.config(background='black')
         self.login_frame.place(relx=0.5, rely=0.5, anchor='center')
 
+        self.bind('<Return>', self.login)
+
         self.username_label = Label(self.login_frame, font=('default', 20), text='Username', bg="black", fg='white')
         self.username_label.grid(row=0, column=0, padx=5)
 
@@ -31,10 +33,10 @@ class Login(Tk):
         self.password_entry.grid(row=1, column=1, pady=30)
 
         self.login_button = Button(self, text='Login', font=('default', 16), width=12, bg='white', fg='black',
-                                   command=self.login)
+                                   command=lambda: self.login(''))
         self.login_button.place(relx=0.5, rely=0.8, anchor='center')
 
-    def login(self):
+    def login(self, event):
         res = LoginController.login(self.connection, self.username_entry.get(), self.password_entry.get())
         match res['status']:
             case 401:

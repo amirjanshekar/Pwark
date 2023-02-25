@@ -18,3 +18,9 @@ class ReworkController:
         connection.cur.execute("SELECT id FROM rework WHERE productId=? AND rework=?", (product_id, rework_name,))
         rows = connection.cur.fetchone()
         return rows
+
+    @staticmethod
+    def fetch_rework_by_id(connection, product_id, rework_id):
+        connection.cur.execute("SELECT rework FROM rework WHERE productId=? AND id=?", (product_id, rework_id,))
+        rows = connection.cur.fetchone()
+        return rows

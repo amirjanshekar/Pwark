@@ -18,3 +18,9 @@ class WastageController:
         connection.cur.execute("SELECT id FROM wastages WHERE productId=? AND wastage=?", (product_id, wastage_name,))
         rows = connection.cur.fetchone()
         return rows
+
+    @staticmethod
+    def fetch_wastage_by_id(connection, product_id, wastage_id):
+        connection.cur.execute("SELECT wastage FROM wastages WHERE productId=? AND id=?", (product_id, wastage_id,))
+        rows = connection.cur.fetchone()
+        return rows

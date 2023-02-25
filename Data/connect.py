@@ -18,8 +18,9 @@ class Connection:
             "CREATE TABLE IF NOT EXISTS rework (id INTEGER PRIMARY KEY, rework text, productId INTEGER,  "
             "severity INTEGER, detection INTEGER, FOREIGN KEY(productId) REFERENCES products(id) )")
         self.cur.execute(
-            "CREATE TABLE IF NOT EXISTS main (id INTEGER PRIMARY KEY, year INTEGER, month INTEGER, "
-            "day INTEGER, product INTEGER, type text, work INTEGER, produce INTEGER, data INTEGER)")
+            "CREATE TABLE IF NOT EXISTS final (id INTEGER PRIMARY KEY, year INTEGER, month INTEGER, "
+            "day INTEGER, product INTEGER, type text, work text,workId INTEGER, produce INTEGER, data INTEGER, "
+            "FOREIGN KEY(product) REFERENCES products(id) )")
         self.conn.commit()
 
     def __del__(self):

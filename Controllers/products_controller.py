@@ -16,6 +16,8 @@ class ProductsController:
     @staticmethod
     def fetch_product_by_id(connection, product_id):
         connection.cur.execute("SELECT name FROM products WHERE id=?", (product_id,))
+        rows = connection.cur.fetchone()
+        return rows
 
     @staticmethod
     def fetch_product_by_name(connection, product_name):
