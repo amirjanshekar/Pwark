@@ -1,5 +1,8 @@
 class WastageController:
 
+    def __init__(self):
+        pass
+
     @staticmethod
     def fetch_all_wastage(connection, product_id):
         connection.cur.execute("SELECT wastages.wastage FROM wastages WHERE productId=?", (product_id,))

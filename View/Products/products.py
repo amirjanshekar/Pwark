@@ -385,6 +385,6 @@ class Products(Tk):
 
     def get_ppm_report(self, work_type, months, modal):
         month = (month['id'] for month in months if month['value'] == self.ppm_month_list.get()).__next__()
-        FinalController.export_ppm_data(self.connection, work_type, month)
+        FinalController.export_formatted_data(self.connection, work_type, month)
         messagebox.showinfo(title="Successfully!...", message='Report saved!...')
         modal.destroy()

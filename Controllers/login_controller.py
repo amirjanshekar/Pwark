@@ -1,5 +1,8 @@
 class LoginController:
 
+    def __init__(self):
+        pass
+
     @staticmethod
     def login(connection, username, password):
         connection.cur.execute("SELECT * FROM users WHERE users.username=?", [username])

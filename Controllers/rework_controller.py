@@ -1,5 +1,8 @@
 class ReworkController:
 
+    def __init__(self):
+        pass
+
     @staticmethod
     def fetch_all_reworks(connection, product_id):
         connection.cur.execute("SELECT rework.rework FROM rework WHERE productId=?", (product_id,))

@@ -1,5 +1,8 @@
 class ProductsController:
 
+    def __init__(self):
+        pass
+
     @staticmethod
     def fetch_all_products(connection):
         connection.cur.execute("SELECT products.name FROM products")

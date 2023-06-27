@@ -1,5 +1,8 @@
 class YearsController:
 
+    def __init__(self):
+        pass
+
     @staticmethod
     def fetch_all_years(connection):
         connection.cur.execute("SELECT * FROM years")

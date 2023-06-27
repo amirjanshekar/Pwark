@@ -1,9 +1,11 @@
 from Utils.exporter import exporter, ppm_exporter
 from Utils.ppm_calculator import ppm_calculator
-import csv
 
 
 class FinalController:
+
+    def __init__(self):
+        pass
 
     @staticmethod
     def add_final(connection, data):
@@ -39,6 +41,28 @@ class FinalController:
 
     @staticmethod
     def export_ppm_data(connection, work_type, month):
+        connection.cur.execute(
+            "SELECT final.id, final.year, final.month, final.day, "
+            "products.name, final.type, final.work, final.workId, final.produce, final.data, final.product "
+            "FROM final JOIN products ON final.id = products.id WHERE type=? AND month<? AND year=1401 ",
+            (work_type, month,))
+        data = connection.cur.fetchall()
+
+        connection.cur.execute(
+            "SELECT final.id, final.year, final.month, final.day, "
+            "products.name, final.type, final.work,final.workId, final.produce, final.data, final.product "
+            "FROM final JOIN products ON final.id = products.id WHERE type=? AND month>=? AND year=1400 ",
+            (work_type, month,))
+        data2 = connection.cur.fetchall()
+
+        all_data = data + data2
+        final_data = ppm_calculator(connection, work_type, all_data)
+
+        ppm_exporter(connection, final_data, work_type, month, 1401)
+        return data
+
+    @staticmethod
+    def export_formatted_data(connection, work_type, month):
         connection.cur.execute(
             "SELECT final.id, final.year, final.month, final.day, "
             "products.name, final.type, final.work, final.workId, final.produce, final.data, final.product "
