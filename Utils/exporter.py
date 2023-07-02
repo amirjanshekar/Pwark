@@ -21,8 +21,6 @@ def exporter(data, work_type, min_month='', max_month='', year=''):
                 if sheet_name[f'{i}{j}'].value is None:
                     sheet_name[f'{m}'] = item[8]
                     break
-                else:
-                    continue
 
             srcfile.save('./Output/{}.xlsm'.format(item[4]))
             csv_out.writerow(item)
