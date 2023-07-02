@@ -22,7 +22,7 @@ def exporter(data, work_type, min_month='', max_month='', year=''):
                     sheet_name[f'{m}'] = item[8]
                     break
                 else:
-                    break
+                    continue
 
             srcfile.save('./Output/{}.xlsm'.format(item[4]))
             csv_out.writerow(item)
