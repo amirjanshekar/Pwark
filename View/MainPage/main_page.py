@@ -6,6 +6,8 @@ from View.Products.products import Products
 
 
 class MainMenu(Tk):
+    add_year_entry: Entry
+    remove_year_combo: ttk.Combobox
 
     def __init__(self, connection):
         super().__init__()
@@ -25,8 +27,8 @@ class MainMenu(Tk):
         self.menubar.add_cascade(label="File", menu=self.main_menu)
 
         self.year_sub_menu = Menu(self.main_menu, tearoff=0)
-        self.year_sub_menu.add_command(label='Add')
-        self.year_sub_menu.add_command(label='Remove')
+        self.year_sub_menu.add_command(label='Add', command=self.add_year)
+        self.year_sub_menu.add_command(label='Remove', command=self.remove_year)
         self.main_menu.add_cascade(label="Year", menu=self.year_sub_menu)
 
         self.title_img = ImageTk.PhotoImage(Image.open("Images/pwarklogo2.png"))
@@ -98,3 +100,69 @@ class MainMenu(Tk):
         self.destroy()
         products = Products(self.connection, data)
         products.mainloop()
+
+    def add_year(self):
+        add_year_window = Tk()
+        add_year_window.geometry("400x200")
+        add_year_window.configure(bg='white')
+        add_year_window.resizable(False, False)
+        add_year_window.title('Add years')
+
+        add_year_entry_frame = Frame(add_year_window, bg='white')
+        add_year_entry_frame.grid(row=0, column=0, padx=10, pady=10, sticky='')
+
+        add_year_button_frame = Frame(add_year_window, bg='white')
+        add_year_button_frame.grid(row=2, column=0, pady=10, padx=10, sticky='')
+
+        year_label = Label(add_year_entry_frame, text='Enter New Year', bg='white', fg='black')
+        year_label.grid(row=0, column=0, sticky='')
+        self.add_year_entry = Entry(add_year_entry_frame, width=30)
+        self.add_year_entry.grid(row=1, column=0, sticky='')
+
+        add_year_button = ttk.Button(add_year_button_frame, text='Add year',
+                                     command=lambda: self.add_year_function(add_year_window))
+        add_year_button.grid(row=0, column=0, sticky='')
+
+        add_year_window.grid_columnconfigure(0, weight=1)
+
+    def add_year_function(self, window):
+        YearsController.add_year(self.connection, self.add_year_entry.get())
+        self.year_data = YearsController.fetch_all_years(self.connection)
+        self.years = [year_row['year'] for year_row in self.year_data]
+        self.year_list['values'] = self.years
+        window.destroy()
+
+    def remove_year(self):
+        remove_year_window = Tk()
+        remove_year_window.geometry("400x200")
+        remove_year_window.configure(bg='white')
+        remove_year_window.resizable(False, False)
+        remove_year_window.title('Add years')
+
+        remove_year_entry_frame = Frame(remove_year_window, bg='white')
+        remove_year_entry_frame.grid(row=0, column=0, padx=10, pady=10, sticky='')
+
+        remove_year_button_frame = Frame(remove_year_window, bg='white')
+        remove_year_button_frame.grid(row=2, column=0, pady=10, padx=10, sticky='')
+
+        remove_year_label = Label(remove_year_entry_frame, text='Enter Type', bg='white', fg='black')
+        remove_year_label.grid(row=2, column=0, sticky='')
+        self.remove_year_combo = ttk.Combobox(remove_year_entry_frame, textvariable=StringVar(),
+                                              values=self.years,
+                                              state="readonly", width=30)
+        self.remove_year_combo.grid(row=3, column=0, sticky='')
+
+        remove_year_button = ttk.Button(remove_year_button_frame, text='Remove year',
+                                        command=lambda: self.remove_year_function(remove_year_window))
+        remove_year_button.grid(row=0, column=0, sticky='')
+
+        remove_year_window.grid_columnconfigure(0, weight=1)
+
+    def remove_year_function(self, window):
+        year_id = (year['id'] for year in self.year_data if
+                   str(year['year']) == self.remove_year_combo.get()).__next__()
+        YearsController.remove_year(self.connection, year_id)
+        self.year_data = YearsController.fetch_all_years(self.connection)
+        self.years = [year_row['year'] for year_row in self.year_data]
+        self.year_list['values'] = self.years
+        window.destroy()

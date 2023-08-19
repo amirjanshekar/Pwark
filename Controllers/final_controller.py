@@ -35,7 +35,6 @@ class FinalController:
             "FROM final JOIN products ON final.id = products.id WHERE type=? AND ?<=month AND month<=? AND year=? ",
             (work_type, min_month, max_month, year,))
         data = connection.cur.fetchall()
-
         exporter(data, work_type, min_month, max_month, year)
         return data
 
