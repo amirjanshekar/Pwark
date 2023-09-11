@@ -3,6 +3,7 @@ from tkinter import ttk
 from PIL import ImageTk, Image
 from Controllers.years_controller import YearsController
 from View.Products.products import Products
+from tkinter import messagebox
 
 
 class MainMenu(Tk):
@@ -126,10 +127,14 @@ class MainMenu(Tk):
         add_year_window.grid_columnconfigure(0, weight=1)
 
     def add_year_function(self, window):
-        YearsController.add_year(self.connection, self.add_year_entry.get())
-        self.year_data = YearsController.fetch_all_years(self.connection)
-        self.years = [year_row['year'] for year_row in self.year_data]
-        self.year_list['values'] = self.years
+        if int(self.add_year_entry.get()) not in [item["year"] for item in
+                                                  YearsController.fetch_all_years(self.connection)]:
+            YearsController.add_year(self.connection, self.add_year_entry.get())
+            self.year_data = YearsController.fetch_all_years(self.connection)
+            self.years = [year_row['year'] for year_row in self.year_data]
+            self.year_list['values'] = self.years
+        else:
+            messagebox.showerror(title="Login Error", message="Duplicate year")
         window.destroy()
 
     def remove_year(self):

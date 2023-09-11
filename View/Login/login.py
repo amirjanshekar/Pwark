@@ -33,10 +33,10 @@ class Login(Tk):
         self.password_entry.grid(row=1, column=1, pady=30)
 
         self.login_button = Button(self, text='Login', font=('default', 16), width=12, bg='white', fg='black',
-                                   command=lambda: self.login(''))
+                                   command=self.login)
         self.login_button.place(relx=0.5, rely=0.8, anchor='center')
 
-    def login(self, event):
+    def login(self):
         res = LoginController.login(self.connection, self.username_entry.get(), self.password_entry.get())
         match res['status']:
             case 401:

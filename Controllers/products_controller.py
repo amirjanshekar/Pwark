@@ -32,8 +32,3 @@ class ProductsController:
     def remove_product(connection, product_id):
         connection.cur.execute("DELETE FROM products WHERE id=?", (product_id,))
         connection.conn.commit()
-
-    @staticmethod
-    def update_product(connection, product_id, name):
-        connection.cur.execute("UPDATE products SET name = ? WHERE id = ?", (name, product_id))
-        connection.conn.commit()

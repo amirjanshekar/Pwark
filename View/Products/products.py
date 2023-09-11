@@ -1,13 +1,13 @@
 from tkinter import *
 from tkinter import ttk, Entry
+from tkinter import messagebox
 
 from PIL import ImageTk, Image
 from Controllers.products_controller import ProductsController
 from Controllers.wastage_controller import WastageController
 from Controllers.final_controller import FinalController
 from Controllers.rework_controller import ReworkController
-from Controllers.years_controller import YearsController
-from tkinter import messagebox
+from View.MainPage.main_page import MainMenu
 
 
 class Products(Tk):
@@ -19,6 +19,7 @@ class Products(Tk):
     from_month_list: ttk.Combobox
     to_month_list: ttk.Combobox
     ppm_month_list: ttk.Combobox
+    remove_product_combo: ttk.Combobox
 
     def __init__(self, connection, data):
         super().__init__()
@@ -64,17 +65,10 @@ class Products(Tk):
 
         self.product_sub_menu = Menu(self.main_menu, tearoff=0)
         self.product_sub_menu.add_command(label='Add', command=self.add_product)
-        self.product_sub_menu.add_command(label='Remove')
+        self.product_sub_menu.add_command(label='Remove', command=self.remove_product)
         self.main_menu.add_cascade(label="Product", menu=self.product_sub_menu)
 
-        self.info_sub_menu = Menu(self.main_menu, tearoff=0)
-        self.info_sub_menu.add_command(label='Add')
-        self.info_sub_menu.add_command(label='Remove')
-        self.main_menu.add_cascade(label="Picture or Text", menu=self.info_sub_menu)
-
         self.rework_sub_menu = Menu(self.report_menu, tearoff=0)
-        self.rework_sub_menu.add_command(label='گزارش ماهانه',
-                                         command=lambda: self.report_by_month_and_year_view('rework'))
         self.rework_sub_menu.add_command(label='گزارش ',
                                          command=lambda: FinalController.export_data_by_type(self.connection, 'rework'))
         self.rework_sub_menu.add_command(label='لیست RPN و PPM',
@@ -82,8 +76,6 @@ class Products(Tk):
         self.report_menu.add_cascade(label='دوباره کاری', menu=self.rework_sub_menu)
 
         self.un_comforting_sub_menu = Menu(self.report_menu, tearoff=0)
-        self.un_comforting_sub_menu.add_command(label='گزارش ماهانه',
-                                                command=lambda: self.report_by_month_and_year_view('wastage'))
         self.un_comforting_sub_menu.add_command(label='گزارش ',
                                                 command=lambda: FinalController.export_data_by_type(self.connection,
                                                                                                     'wastage'))
@@ -137,6 +129,8 @@ class Products(Tk):
         ttk.Style().map('TButton', background=[('active', 'darkorange')], foreground=[('active', 'darkorange')])
         self.save_button = ttk.Button(self, text='Add data', width=20, command=self.send_data)
         self.save_button.place(relx=0.40, rely=0.8)
+        self.return_button = ttk.Button(self, text='Return', width=20, command=self.go_to_first_page)
+        self.return_button.place(relx=0.25, rely=0.8)
 
     def add_product(self):
         add_product_window = Tk()
@@ -191,6 +185,32 @@ class Products(Tk):
         close_button.grid(row=0, column=1, sticky='')
         add_product_window.grid_columnconfigure(0, weight=1)
 
+    def remove_product(self):
+        remove_product_window = Tk()
+        remove_product_window.geometry("400x200")
+        remove_product_window.configure(bg='white')
+        remove_product_window.resizable(False, False)
+        remove_product_window.title('Edit Products')
+
+        remove_product_entry_frame = Frame(remove_product_window, bg='white')
+        remove_product_entry_frame.grid(row=0, column=0, padx=10, pady=10, sticky='')
+
+        remove_product_button_frame = Frame(remove_product_window, bg='white')
+        remove_product_button_frame.grid(row=2, column=0, pady=10, padx=10, sticky='')
+
+        type_label = Label(remove_product_entry_frame, text='Enter Type', bg='white', fg='black')
+        type_label.grid(row=2, column=0, sticky='')
+        self.remove_product_combo = ttk.Combobox(remove_product_entry_frame, textvariable=StringVar(),
+                                                 values=self.products,
+                                                 state="readonly", width=30)
+        self.remove_product_combo.grid(row=3, column=0, sticky='')
+
+        add_product_button = ttk.Button(remove_product_button_frame, text='Remove',
+                                        command=lambda: self.remove_product_from_list(remove_product_window))
+        add_product_button.grid(row=0, column=0, sticky='')
+
+        remove_product_window.grid_columnconfigure(0, weight=1)
+
     def send_data(self):
         self.data['type'] = self.type_list.get()
         self.data['data'] = self.number_spin.get()
@@ -217,7 +237,7 @@ class Products(Tk):
         self.current_reworks = []
         window.destroy()
 
-    def change_data_of_works(self, event):
+    def change_data_of_works(self):
         product_id = ProductsController.fetch_product_by_name(self.connection, self.product_list.get())[0]
         if self.type_list.get() == 'wastage':
             self.show_work_data = WastageController.fetch_all_wastage(self.connection, product_id)
@@ -226,66 +246,13 @@ class Products(Tk):
         for index in range(len(self.show_work_data)):
             self.label_ppm_rework_list.insert(index, self.show_work_data[index])
 
-    def report_by_month_and_year_view(self, work_type):
-        report_by_month_and_year_window = Tk()
-        report_by_month_and_year_window.geometry("600x400")
-        report_by_month_and_year_window.configure(bg='white')
-        report_by_month_and_year_window.resizable(False, False)
-        report_by_month_and_year_window.title('Report')
-
-        report_year_frame = Frame(report_by_month_and_year_window, bg='white')
-        report_year_frame.grid(row=0, column=0, padx=10, pady=10, sticky='')
-
-        report_month_frame = Frame(report_by_month_and_year_window, bg='white')
-        report_month_frame.grid(row=1, column=0, padx=10, pady=10, sticky='')
-
-        set_report_frame = Frame(report_by_month_and_year_window, bg='white')
-        set_report_frame.grid(row=2, column=0, padx=10, pady=10, sticky='')
-
-        Label(report_year_frame, text='Year', bg='white', fg='black').grid(row=0, column=0)
-        year_data = YearsController.fetch_all_years(self.connection)
-        years = [year_row['year'] for year_row in year_data]
-
-        self.report_year_list = ttk.Combobox(report_year_frame, textvariable=StringVar(), values=years,
-                                             state="readonly", width=8)
-        self.report_year_list.current(0)
-        self.report_year_list.grid(row=0, column=1)
-
-        Label(report_month_frame, text='From', bg='white', fg='black').grid(row=0, column=0)
-
-        months = [
-            {'id': 1, 'value': 'فروردين'},
-            {'id': 2, 'value': 'ارديبهشت'},
-            {'id': 3, 'value': 'خرداد'},
-            {'id': 4, 'value': 'تير'},
-            {'id': 5, 'value': 'مرداد'},
-            {'id': 6, 'value': 'شهريور'},
-            {'id': 7, 'value': 'مهر'},
-            {'id': 8, 'value': 'آبان'},
-            {'id': 9, 'value': 'آذر'},
-            {'id': 10, 'value': 'دي'},
-            {'id': 11, 'value': 'بهمن'},
-            {'id': 12, 'value': 'اسفند'},
-        ]
-        self.from_month_list = ttk.Combobox(report_month_frame, textvariable=StringVar(),
-                                            values=[month['value'] for month in months],
-                                            state="readonly", width=15)
-        self.from_month_list.current(0)
-        self.from_month_list.grid(row=0, column=1)
-
-        Label(report_month_frame, text='From', bg='white', fg='black').grid(row=0, column=2)
-
-        self.to_month_list = ttk.Combobox(report_month_frame, textvariable=StringVar(),
-                                          values=[month['value'] for month in months],
-                                          state="readonly", width=15)
-        self.to_month_list.current(0)
-        self.to_month_list.grid(row=0, column=3)
-
-        get_report_button = ttk.Button(set_report_frame, text='Save Report',
-                                       command=lambda: self.get_reports(work_type, months,
-                                                                        report_by_month_and_year_window))
-        get_report_button.grid(row=0, column=0, sticky='')
-        report_by_month_and_year_window.grid_columnconfigure(0, weight=1)
+    def remove_product_from_list(self, window):
+        product_id = ProductsController.fetch_product_by_name(self.connection, self.remove_product_combo.get())[0]
+        ProductsController.remove_product(self.connection, product_id)
+        self.products = ProductsController.fetch_all_products(self.connection)
+        self.remove_product_combo['values'] = self.products
+        self.product_list['values'] = self.products
+        window.destroy()
 
     def insert_product_to_list(self, frame):
         if (self.add_product_entry.get()) not in self.products:
@@ -335,14 +302,6 @@ class Products(Tk):
                     Label(frame, text='rework', bg='white', fg='black',
                           width=20).grid(row=index + 2, column=3)
 
-    def get_reports(self, work_type, months, modal):
-        from_month = (month['id'] for month in months if month['value'] == self.from_month_list.get()).__next__()
-        to_month = (month['id'] for month in months if month['value'] == self.to_month_list.get()).__next__()
-        FinalController.export_data_by_type_and_month_and_year(self.connection, work_type, from_month, to_month,
-                                                               self.report_year_list.get())
-        messagebox.showinfo(title="Successfully!...", message='Report saved!...')
-        modal.destroy()
-
     def get_rpn_ppm_view(self, work_type):
         report_rpn_ppm_window = Tk()
         report_rpn_ppm_window.geometry("600x400")
@@ -388,3 +347,8 @@ class Products(Tk):
         FinalController.export_formatted_data(self.connection, work_type, month)
         messagebox.showinfo(title="Successfully!...", message='Report saved!...')
         modal.destroy()
+
+    def go_to_first_page(self):
+        self.destroy()
+        app = MainMenu(self.connection)
+        app.mainloop()
