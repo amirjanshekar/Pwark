@@ -7,7 +7,6 @@ from Controllers.products_controller import ProductsController
 from Controllers.wastage_controller import WastageController
 from Controllers.final_controller import FinalController
 from Controllers.rework_controller import ReworkController
-from View.MainPage.main_page import MainMenu
 
 
 class Products(Tk):
@@ -129,8 +128,6 @@ class Products(Tk):
         ttk.Style().map('TButton', background=[('active', 'darkorange')], foreground=[('active', 'darkorange')])
         self.save_button = ttk.Button(self, text='Add data', width=20, command=self.send_data)
         self.save_button.place(relx=0.40, rely=0.8)
-        self.return_button = ttk.Button(self, text='Return', width=20, command=self.go_to_first_page)
-        self.return_button.place(relx=0.25, rely=0.8)
 
     def add_product(self):
         add_product_window = Tk()
@@ -347,8 +344,3 @@ class Products(Tk):
         FinalController.export_formatted_data(self.connection, work_type, month)
         messagebox.showinfo(title="Successfully!...", message='Report saved!...')
         modal.destroy()
-
-    def go_to_first_page(self):
-        self.destroy()
-        app = MainMenu(self.connection)
-        app.mainloop()
