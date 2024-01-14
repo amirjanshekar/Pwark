@@ -19,11 +19,17 @@ class Products(Tk):
     to_month_list: ttk.Combobox
     ppm_month_list: ttk.Combobox
     remove_product_combo: ttk.Combobox
+    edit_data_type_combo: ttk.Combobox
+    edit_product_combo: ttk.Combobox
+    edit_data_list: Listbox
+    edit_data_produce_entry: Entry
+    edit_data_data_amount_entry: Entry
 
     def __init__(self, connection, data):
         super().__init__()
 
         self.show_work_data = []
+        self.edit_show_work_data = []
         self.current_wastage = []
         self.current_reworks = []
         self.connection = connection
@@ -32,6 +38,7 @@ class Products(Tk):
         self.add_work_entries = []
 
         self.products = ProductsController.fetch_all_products(connection)
+        self.edit_products = []
 
         self.geometry('1350x768')
         self.resizable(width=False, height=False)
@@ -59,8 +66,12 @@ class Products(Tk):
 
         self.main_menu = Menu(self.menubar, tearoff=0)
         self.report_menu = Menu(self.menubar, tearoff=0)
+        self.edit_menu = Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(label="File", menu=self.main_menu)
         self.menubar.add_cascade(label="Report", menu=self.report_menu)
+        self.menubar.add_cascade(label="Edit", menu=self.edit_menu)
+
+        self.edit_menu.add_command(label='ویرایش ', command=self.edit_data)
 
         self.product_sub_menu = Menu(self.main_menu, tearoff=0)
         self.product_sub_menu.add_command(label='Add', command=self.add_product)
@@ -202,11 +213,75 @@ class Products(Tk):
                                                  state="readonly", width=30)
         self.remove_product_combo.grid(row=3, column=0, sticky='')
 
-        add_product_button = ttk.Button(remove_product_button_frame, text='Remove',
-                                        command=lambda: self.remove_product_from_list(remove_product_window))
-        add_product_button.grid(row=0, column=0, sticky='')
+        remove_product_button = ttk.Button(remove_product_button_frame, text='Remove',
+                                           command=lambda: self.remove_product_from_list(remove_product_window))
+        remove_product_button.grid(row=0, column=0, sticky='')
 
         remove_product_window.grid_columnconfigure(0, weight=1)
+
+    def edit_data(self):
+        edit_data_window = Tk()
+        edit_data_window.geometry("400x400")
+        edit_data_window.configure(bg='white')
+        edit_data_window.resizable(False, False)
+        edit_data_window.title('Edit Products')
+
+        edit_data_entry_frame = Frame(edit_data_window, bg='white')
+        edit_data_entry_frame.grid(row=0, column=0, padx=10, pady=10, sticky='')
+
+        edit_data_button_frame = Frame(edit_data_window, bg='white')
+        edit_data_button_frame.grid(row=2, column=0, pady=10, padx=10, sticky='')
+
+        data_type_label = Label(edit_data_entry_frame, text='Data Type', bg='white', fg='black')
+        data_type_label.grid(row=2, column=0, sticky='')
+        self.edit_data_type_combo = ttk.Combobox(edit_data_entry_frame, textvariable=StringVar(),
+                                                 values=['wastage', 'rework'],
+                                                 state="readonly", width=30)
+        self.edit_data_type_combo.grid(row=3, column=0, sticky='')
+        self.edit_data_type_combo.current(0)
+        self.edit_data_type_combo.bind('<<ComboboxSelected>>', self.change_edit_data)
+
+        self.edit_products = FinalController.fetch_data_by_type(self.connection, self.data['year'], self.data['month'],
+                                                                self.data['day'], self.edit_data_type_combo.get())
+
+        product_label = Label(edit_data_entry_frame, text='Data', bg='white', fg='black')
+        product_label.grid(row=4, column=0, sticky='')
+        self.edit_product_combo = ttk.Combobox(edit_data_entry_frame, textvariable=StringVar(),
+                                               values=FinalController.fetch_data_by_type(self.connection,
+                                                                                         self.data['year'],
+                                                                                         self.data['month'],
+                                                                                         self.data['day'],
+                                                                                         self.edit_data_type_combo.get()),
+                                               state="readonly", width=30)
+        self.edit_product_combo.grid(row=5, column=0, sticky='')
+        self.edit_product_combo.current(0)
+        self.edit_product_combo.bind('<<ComboboxSelected>>', self.set_edit_data)
+
+        produce_label = Label(edit_data_entry_frame, text='Produce', bg='white', fg='black')
+        produce_label.grid(row=6, column=0, sticky='')
+        self.edit_data_produce_entry = Entry(edit_data_entry_frame, width=50)
+        self.edit_data_produce_entry.grid(row=7, column=0, sticky='')
+
+        data_amount_label = Label(edit_data_entry_frame, text='Data amount', bg='white', fg='black')
+        data_amount_label.grid(row=8, column=0, sticky='')
+        self.edit_data_data_amount_entry = Entry(edit_data_entry_frame, width=50)
+        self.edit_data_data_amount_entry.grid(row=9, column=0, sticky='')
+
+        edit_data_button = ttk.Button(edit_data_button_frame, text='Edit',
+                                      command=lambda: self.edit_data_from_list(edit_data_window))
+        edit_data_button.grid(row=0, column=0, sticky='')
+
+        edit_data_window.grid_columnconfigure(0, weight=1)
+
+    def change_edit_data(self, args):
+        self.edit_product_combo['values'] = FinalController.fetch_data_by_type(self.connection, self.data['year'],
+                                                                               self.data['month'],
+                                                                               self.data['day'],
+                                                                               self.edit_data_type_combo.get())
+
+    def set_edit_data(self, args):
+        self.edit_data_produce_entry['value'] = 0
+        self.edit_data_data_amount_entry['value'] = 0
 
     def send_data(self):
         self.data['type'] = self.type_list.get()
@@ -234,7 +309,7 @@ class Products(Tk):
         self.current_reworks = []
         window.destroy()
 
-    def change_data_of_works(self):
+    def change_data_of_works(self, args):
         product_id = ProductsController.fetch_product_by_name(self.connection, self.product_list.get())[0]
         if self.type_list.get() == 'wastage':
             self.show_work_data = WastageController.fetch_all_wastage(self.connection, product_id)
@@ -242,6 +317,9 @@ class Products(Tk):
             self.show_work_data = ReworkController.fetch_all_reworks(self.connection, product_id)
         for index in range(len(self.show_work_data)):
             self.label_ppm_rework_list.insert(index, self.show_work_data[index])
+        data = FinalController.fetch_data_by_type(self.connection, self.data['year'], self.data['month'],
+                                                  self.data['day'], self.type_list.get())
+        print(data)
 
     def remove_product_from_list(self, window):
         product_id = ProductsController.fetch_product_by_name(self.connection, self.remove_product_combo.get())[0]
@@ -249,6 +327,15 @@ class Products(Tk):
         self.products = ProductsController.fetch_all_products(self.connection)
         self.remove_product_combo['values'] = self.products
         self.product_list['values'] = self.products
+        window.destroy()
+
+    def edit_data_from_list(self, window):
+        print(FinalController.fetch_all_data(self.connection))
+        # product_id = ProductsController.fetch_product_by_name(self.connection, self.remove_product_combo.get())[0]
+        # ProductsController.remove_product(self.connection, product_id)
+        # self.products = ProductsController.fetch_all_products(self.connection)
+        # self.remove_product_combo['values'] = self.products
+        # self.product_list['values'] = self.products
         window.destroy()
 
     def insert_product_to_list(self, frame):

@@ -10,6 +10,7 @@ def exporter(data, work_type):
         srcfile = openpyxl.load_workbook('./Forms/{}.xlsx'.format(work_type), read_only=False, keep_vba=True)
         sheet_name = srcfile.get_sheet_by_name('1')
         sheet_name['C2'] = item[4]
+        sheet_name['E2'] = f'{item[1]}/{item[2]}/{item[3]} تاریخ: '
         for m in range(5, 14):
             if sheet_name[f'E{m}'].value is None and sheet_name[f'B{m}'].value is None:
                 sheet_name[f'E{m}'] = item[8]

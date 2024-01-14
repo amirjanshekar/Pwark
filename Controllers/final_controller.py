@@ -15,6 +15,33 @@ class FinalController:
         connection.conn.commit()
 
     @staticmethod
+    def fetch_all_data(connection):
+        connection.cur.execute("SELECT * FROM final")
+        rows = connection.cur.fetchall()
+        print(rows)
+        for index in range(len(rows)):
+            rows[index] = rows[index][0]
+        return rows
+
+    @staticmethod
+    def fetch_data(connection, year, month, day, work_type, product):
+        connection.cur.execute("SELECT final.id, products.name, final.work FROM final JOIN products ON "
+                               "final.id = products.id WHERE year=? AND month=? AND day=? AND type=? "
+                               "AND product=?", (year, month, day, work_type, product,))
+        rows = connection.cur.fetchall()
+        return rows
+
+    @staticmethod
+    def fetch_data_by_type(connection, year, month, day, work_type):
+        connection.cur.execute("SELECT final.id, products.name, final.work FROM final JOIN products ON "
+                               "final.id = products.id WHERE year=? AND month=? AND day=? AND type=? "
+                               , (year, month, day, work_type,))
+        rows = connection.cur.fetchall()
+        # for index in range(len(rows)):
+        #     rows[index] = rows[index][0] + ',' +  ""
+        return rows
+
+    @staticmethod
     def export_data_by_type(connection, work_type):
         connection.cur.execute(
             "SELECT final.id, final.year, final.month, final.day, "
