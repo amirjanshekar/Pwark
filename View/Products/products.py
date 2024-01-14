@@ -34,6 +34,7 @@ class Products(Tk):
         self.current_reworks = []
         self.connection = connection
         self.data = data
+        self.fetched_final_data = {}
 
         self.add_work_entries = []
 
@@ -246,12 +247,13 @@ class Products(Tk):
 
         product_label = Label(edit_data_entry_frame, text='Data', bg='white', fg='black')
         product_label.grid(row=4, column=0, sticky='')
+        self.fetched_final_data = FinalController.fetch_data_by_type(self.connection,
+                                                                     self.data['year'],
+                                                                     self.data['month'],
+                                                                     self.data['day'],
+                                                                     self.edit_data_type_combo.get())
         self.edit_product_combo = ttk.Combobox(edit_data_entry_frame, textvariable=StringVar(),
-                                               values=FinalController.fetch_data_by_type(self.connection,
-                                                                                         self.data['year'],
-                                                                                         self.data['month'],
-                                                                                         self.data['day'],
-                                                                                         self.edit_data_type_combo.get()),
+                                               values=self.fetched_final_data['item'],
                                                state="readonly", width=30)
         self.edit_product_combo.grid(row=5, column=0, sticky='')
         self.edit_product_combo.current(0)
@@ -261,11 +263,13 @@ class Products(Tk):
         produce_label.grid(row=6, column=0, sticky='')
         self.edit_data_produce_entry = Entry(edit_data_entry_frame, width=50)
         self.edit_data_produce_entry.grid(row=7, column=0, sticky='')
+        self.edit_data_produce_entry.insert(0, str(self.fetched_final_data['produce'][0]))
 
         data_amount_label = Label(edit_data_entry_frame, text='Data amount', bg='white', fg='black')
         data_amount_label.grid(row=8, column=0, sticky='')
         self.edit_data_data_amount_entry = Entry(edit_data_entry_frame, width=50)
         self.edit_data_data_amount_entry.grid(row=9, column=0, sticky='')
+        self.edit_data_data_amount_entry.insert(0, str(self.fetched_final_data['amount'][0]))
 
         edit_data_button = ttk.Button(edit_data_button_frame, text='Edit',
                                       command=lambda: self.edit_data_from_list(edit_data_window))
@@ -274,14 +278,21 @@ class Products(Tk):
         edit_data_window.grid_columnconfigure(0, weight=1)
 
     def change_edit_data(self, args):
-        self.edit_product_combo['values'] = FinalController.fetch_data_by_type(self.connection, self.data['year'],
-                                                                               self.data['month'],
-                                                                               self.data['day'],
-                                                                               self.edit_data_type_combo.get())
+        self.fetched_final_data = FinalController.fetch_data_by_type(self.connection, self.data['year'],
+                                                                     self.data['month'],
+                                                                     self.data['day'],
+                                                                     self.edit_data_type_combo.get())
+        self.edit_product_combo['values'] = self.fetched_final_data['item']
 
     def set_edit_data(self, args):
-        self.edit_data_produce_entry['value'] = 0
-        self.edit_data_data_amount_entry['value'] = 0
+        self.edit_data_produce_entry.delete(0, END)
+        self.edit_data_produce_entry.insert(0, str(self.fetched_final_data['produce'][
+                                                       self.fetched_final_data['item'].index(
+                                                           self.edit_product_combo.get())]))
+        self.edit_data_data_amount_entry.delete(0, END)
+        self.edit_data_data_amount_entry.insert(0, str(self.fetched_final_data['amount'][
+                                                           self.fetched_final_data['item'].index(
+                                                               self.edit_product_combo.get())]))
 
     def send_data(self):
         self.data['type'] = self.type_list.get()
@@ -319,7 +330,6 @@ class Products(Tk):
             self.label_ppm_rework_list.insert(index, self.show_work_data[index])
         data = FinalController.fetch_data_by_type(self.connection, self.data['year'], self.data['month'],
                                                   self.data['day'], self.type_list.get())
-        print(data)
 
     def remove_product_from_list(self, window):
         product_id = ProductsController.fetch_product_by_name(self.connection, self.remove_product_combo.get())[0]
@@ -330,12 +340,9 @@ class Products(Tk):
         window.destroy()
 
     def edit_data_from_list(self, window):
-        print(FinalController.fetch_all_data(self.connection))
-        # product_id = ProductsController.fetch_product_by_name(self.connection, self.remove_product_combo.get())[0]
-        # ProductsController.remove_product(self.connection, product_id)
-        # self.products = ProductsController.fetch_all_products(self.connection)
-        # self.remove_product_combo['values'] = self.products
-        # self.product_list['values'] = self.products
+        final_id = self.fetched_final_data['id'][self.fetched_final_data['item'].index(self.edit_product_combo.get())]
+        FinalController.update_data(self.connection, final_id, self.edit_data_produce_entry.get(),
+                                    self.edit_data_data_amount_entry.get())
         window.destroy()
 
     def insert_product_to_list(self, frame):
