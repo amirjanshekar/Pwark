@@ -25,7 +25,7 @@ class FinalController:
     @staticmethod
     def fetch_data(connection, year, month, day, work_type, product):
         connection.cur.execute("SELECT final.id, products.name, final.work FROM final JOIN products ON "
-                               "final.id = products.id WHERE year=? AND month=? AND day=? AND type=? "
+                               "final.product = products.id WHERE year=? AND month=? AND day=? AND type=? "
                                "AND product=?", (year, month, day, work_type, product,))
         rows = connection.cur.fetchall()
         return rows
@@ -39,7 +39,7 @@ class FinalController:
     @staticmethod
     def fetch_data_by_type(connection, year, month, day, work_type):
         connection.cur.execute("SELECT final.id, products.name, final.work, final.produce, final.data "
-                               "FROM final JOIN products ON final.id = products.id WHERE "
+                               "FROM final JOIN products ON final.product = products.id WHERE "
                                "year=? AND month=? AND day=? AND type=? ", (year, month, day, work_type,))
         rows = connection.cur.fetchall()
         data = {}
@@ -62,8 +62,8 @@ class FinalController:
     def export_data_by_type(connection, work_type):
         connection.cur.execute(
             "SELECT final.id, final.year, final.month, final.day, "
-            "products.name, final.type, final.work, final.produce, final.data "
-            "FROM final JOIN products ON final.id = products.id WHERE type=? ",
+            "products.name, final.type, final.work, final.produce, final.data, final.product "
+            "FROM final JOIN products ON final.product = products.id WHERE type=? ",
             (work_type,))
         rows = connection.cur.fetchall()
 
@@ -76,14 +76,14 @@ class FinalController:
         connection.cur.execute(
             "SELECT final.id, final.year, final.month, final.day, "
             "products.name, final.type, final.work, final.workId, final.produce, final.data, final.product "
-            "FROM final JOIN products ON final.id = products.id WHERE type=? AND month<? AND year=1401 ",
+            "FROM final JOIN products ON final.product = products.id WHERE type=? AND month<? AND year=1401 ",
             (work_type, month,))
         data = connection.cur.fetchall()
 
         connection.cur.execute(
             "SELECT final.id, final.year, final.month, final.day, "
             "products.name, final.type, final.work,final.workId, final.produce, final.data, final.product "
-            "FROM final JOIN products ON final.id = products.id WHERE type=? AND month>=? AND year=1400 ",
+            "FROM final JOIN products ON final.product = products.id WHERE type=? AND month>=? AND year=1400 ",
             (work_type, month,))
         data2 = connection.cur.fetchall()
 
