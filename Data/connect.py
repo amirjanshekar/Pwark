@@ -3,7 +3,7 @@ import sqlite3
 
 class Connection:
     def __init__(self):
-        self.conn = sqlite3.connect('Data/pwark.db')
+        self.conn = sqlite3.connect(r"\\ARIAN-PC\Arian\output\pwark.db")
         self.cur = self.conn.cursor()
         self.cur.execute(
             "CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY, name text)")
